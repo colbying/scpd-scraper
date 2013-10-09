@@ -5,8 +5,7 @@ that they happened as a wmv, then converts them to a mp4. Each time
 the script is run, it will update to download all of the undownloaded
 videos.
 
-This script was originally written by Ben Newhouse [https://github.com/newhouseb](https://github.com/newhouseb), which
-was then edited by Jeremy Keeshin [https://github.com/jkeesh](https://github.com/jkeesh) for scraping SCPD videos. Then Clay Schubiner [https://github.com/cschubiner](https://github.com/cschubiner) made some minor updates and fixes, and now my update accounts for Stanford's mandatory two-factor authentication.
+This script was originally written by Ben Newhouse [https://github.com/newhouseb](https://github.com/newhouseb), which was then edited by Jeremy Keeshin [https://github.com/jkeesh](https://github.com/jkeesh) for scraping SCPD videos. After that, Clay Schubiner [https://github.com/cschubiner](https://github.com/cschubiner) made some minor updates and fixes, and now my update accounts for Stanford's mandatory two-factor authentication.
 
 Unfortunately, there are lots of dependencies to get it up and running
 
