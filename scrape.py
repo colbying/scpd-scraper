@@ -10,14 +10,14 @@ from bs4 import BeautifulSoup
 
 See README for general documentation:
 
-Dependencies: 
+Dependencies:
 1. BeautifulSoup for parsing: [sudo easy_install beautifulsoup4] or [http://www.crummy.com/software/BeautifulSoup/](http://www.crummy.com/software/BeautifulSoup/)
 2. Mechanize for emulating a browser: [sudo easy_install mechanize] or [http://wwwsearch.sourceforge.net/mechanize/](http://wwwsearch.sourceforge.net/mechanize/)
 3. mimms for downloading video streams [sudo apt-get install mimms] or using MacPorts for Mac [http://www.macports.org/](http://www.macports.org/)
 4. (optional- To convert to mp4) Handbrake CLI, for converting to mp4: [http://handbrake.fr/downloads2.php](http://handbrake.fr/downloads2.php)
 5. (optional- prevents scraper from crashing when notes are being used) html5lib parser for BeautifulSoup http://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser
 
-Usage: 
+Usage:
     python scrape.py [yourUserName] [optional flags] "Interactive Computer Graphics" "Programming Abstractions" ...
 
 """
@@ -59,7 +59,7 @@ def download(work, courseName, downloadSettings):
         except:
             print "MP4 Error: unable to convert " + courseName + " to mp4, you may not have installed HandBrakeCLI"
     print "Finished", work[1]
-    
+
 def assertLoginSuccessful(forms):
     for form in forms:
         if (form.name == "login"):
@@ -80,20 +80,29 @@ def downloadAllLectures(username, courseName, password, downloadSettings):
     br["username"] = username
     br["password"] = password
 
-    # Open the course page for the title you're looking for 
+    # Open the course page for the title you're looking for
     print "Logging in to myvideosu.stanford.edu..."
     response = br.submit()
 
     # Assert that the login was successful
     assertLoginSuccessful(br.forms())
-        
+    br.select_form(name="multifactor_send")
+    br.submit()
+    br.select_form(name="login")
+
+    # Assumes you have two-factor authentication with SMS texting
+    otp = raw_input('Enter your code: ')
+
+    br["otp"] = otp
+    response = br.submit()
+
     # Assert Course Exists
     try:
         response = br.follow_link(text=courseName)
     except:
         print 'Course Read Error: "'+ courseName + '"" not found'
         return
-   
+
     print "Logged in, going to course link."
 
     # Build up a list of lectures
@@ -101,7 +110,13 @@ def downloadAllLectures(username, courseName, password, downloadSettings):
     print "Loading video links."
     links = []
     for link in br.links(text="WMP"):
-        links.append(re.search(r"'(.*)'",link.url).group(1))
+        course = link.url.split('%22,%22')[1]
+        courseID = link.url.split('%22,%22')[0].split('openSL(%22')[1]
+        lastPart = str(link).split('","","WA","&wmp=true");'')])')[0].split(course + '","')[1]
+        coID = lastPart.split('","')[0]
+        lectureID = lastPart.split('","')[1]
+        linkurl = "http://myvideosu.stanford.edu/player/slplayer.aspx?coll=" + courseID + "&course=" + course + "&co=" + coID + "&lecture=" + lectureID + "&authtype=WA&wmp=true"
+        links.append(linkurl)
     link_file = open('links.txt', 'w')
 
     if not downloadSettings["newestFirst"]:
@@ -121,7 +136,7 @@ def downloadAllLectures(username, courseName, password, downloadSettings):
             print '\n'
             continue
         video = soup.find('object', id='WMPlayer')['data']
-        video = re.sub("http","mms",video)        
+        video = re.sub("http","mms",video)
         video = video.replace(' ', '%20') # remove spaces, they break urls
         output_name = re.search(r"[a-z]+[0-9]+[a-z]?/[0-9]+",video).group(0).replace("/","_") #+ ".wmv"
 
@@ -150,7 +165,7 @@ def downloadAllCourses(username, courseNames, downloadSettings):
 def printHelpDocumentation():
     print "\n"
     print "=== SCPD Scrape Help==="
-    print "https://github.com/jkeesh/scpd-scraper"
+    print "https://github.com/cschubiner/scpd-scraper"
     print "Usage:"
     print "  python scrape.py 'username' '--flag1' ... '--flagN' 'courseName1' 'courseName2' ... 'courseNameN'"
     print "Flags:"
@@ -158,7 +173,7 @@ def printHelpDocumentation():
     print "  " + ORGANIZE_FLAG + ": auto-organize downloads into subdirectories titled with the course name"
     print "  " +    MP4_FLAG   + ": converts video to mp4"
     print "  " +NEW_FIRST_FLAG + ": downloads the newest (most recent) videos first"
-    print "Dependencies:" 
+    print "Dependencies:"
     print "  1. BeautifulSoup for parsing: [sudo easy_install beautifulsoup4] or [http://www.crummy.com/software/BeautifulSoup/](http://www.crummy.com/software/BeautifulSoup/)"
     print "  2. Mechanize for emulating a browser: [sudo easy_install mechanize] or [http://wwwsearch.sourceforge.net/mechanize/](http://wwwsearch.sourceforge.net/mechanize/)"
     print "  3. mimms for downloading video streams [sudo apt-get install mimms] or using MacPorts for Mac [http://www.macports.org/](http://www.macports.org/)"
@@ -201,4 +216,3 @@ if __name__ == '__main__':
 
 
         downloadAllCourses(username, courseNames, downloadSettings)
-
