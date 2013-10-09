@@ -15,6 +15,7 @@ Unfortunately, there are lots of dependencies to get it up and running
 4. (optional- To convert to mp4) Handbrake CLI, for converting to mp4: [http://handbrake.fr/downloads2.php](http://handbrake.fr/downloads2.php)
 5. (optional- Prevents scraper from crashing when notes are being used) html5lib parser for BeautifulSoup http://www.crummy.com/software/BeautifulSoup/bs4/doc/#installing-a-parser
 
+7. This assumes that you have set up Stanford's two factor authentication (mandatory) via SMS text message.
 Here are the commands for the required steps above:
 
     sudo easy_install beautifulsoup4
